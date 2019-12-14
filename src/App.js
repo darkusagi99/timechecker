@@ -47,17 +47,17 @@ class App extends Component {
     }
 
     // Calcul des durees
-    recalculDurees() {
-        var dureeMatinTmp = this.state.morningEnd - this.state.morningStart;
-        var dureePause = this.state.afternoonStart - this.state.morningEnd;
-        var debutAfternoonMini = new Date(this.state.morningEnd.getTime() + dureeMidiMini);
+    recalculDurees(morningStartDate, morningEndDate, afternoonStartDate) {
+        var dureeMatinTmp = morningEndDate - morningStartDate;
+        var dureePause = afternoonStartDate - morningEndDate;
+        var debutAfternoonMini = new Date(morningEndDate.getTime() + dureeMidiMini);
 
         var debutAfternoonReference;
 
-        if (debutAfternoonMini > this.state.afternoonStart) {
+        if (debutAfternoonMini > afternoonStartDate) {
             debutAfternoonReference = debutAfternoonMini;
         } else {
-            debutAfternoonReference = this.state.afternoonStart;
+            debutAfternoonReference = afternoonStartDate;
         }
 
         this.setState({
@@ -69,12 +69,13 @@ class App extends Component {
 
     }
 
+    // Methodes de mise a jour des dates
     handleDateMorningStartChange = date => {
             this.setState({
                 morningStart : date
             });
 
-            this.recalculDurees();
+            this.recalculDurees(date, this.state.morningEnd, this.state.afternoonStart);
     }
 
     handleDateMorningEndChange = date => {
@@ -82,7 +83,7 @@ class App extends Component {
                 morningEnd : date
             });
 
-            this.recalculDurees();
+            this.recalculDurees(this.state.morningStart , date, this.state.afternoonStart);
     }
 
     handleDateAfternoonStartChange = date => {
@@ -90,9 +91,10 @@ class App extends Component {
                 afternoonStart : date
             });
 
-            this.recalculDurees();
+            this.recalculDurees(this.state.morningStart, this.state.morningEnd, date);
     }
 
+    // Methode de rendu
   render() {
   return (
     <div className="App">
