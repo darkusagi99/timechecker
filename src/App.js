@@ -24,15 +24,29 @@ class App extends Component {
             morningStart : new Date(),
             morningEnd : new Date(),
             afternoonStart : new Date(),
-            afternoonEnd : new Date(),
             dureeMatin : 0,
             dureeMidi : 0,
-            dureeJournee : 0,
-            heuresATravailler : 8,
             heureMiniDepart : ""
         }
     }
 
+    // Methode affichage heures
+    getDisplayTime(timeInterval) {
+
+        var timeHoursTmp = Math.floor(timeInterval / 3600000);
+        var timeMinutesTmp = (timeInterval - (timeHoursTmp * 3600000)) / 60000;
+
+        return timeHoursTmp + "h " + timeMinutesTmp + " min";
+    }
+
+    // Calcul et affichage heure de depart
+    getLeaveTime(dateReference, afternoonDuration) {
+
+        var leaveTimeTmp = new Date(dateReference.getTime() + afternoonDuration);
+        return leaveTimeTmp.getHours() + "h " + leaveTimeTmp.getMinutes() + " min";
+    }
+
+    // Calcul des durees
     recalculDurees() {
         var dureeMatinTmp = this.state.morningEnd - this.state.morningStart;
         var dureePause = this.state.afternoonStart - this.state.morningEnd;
@@ -46,27 +60,10 @@ class App extends Component {
             debutAfternoonReference = this.state.afternoonStart;
         }
 
-        var dureeAfternoon = dureeJourneeStd - dureeMatinTmp;
-        var heureDepartTmp = new Date(debutAfternoonReference.getTime() + (dureeJourneeStd - dureeMatinTmp));
-
-        var dureeMatinHoursTmp = Math.floor(dureeMatinTmp / 3600000);
-        var dureeMatinMinutesTmp = (dureeMatinTmp - (dureeMatinHoursTmp * 3600000)) / 60000;
-
-        var dureeMidiHoursTmp = Math.floor(dureePause / 3600000);
-        var dureeMidiMinutesTmp = (dureePause - (dureeMidiHoursTmp * 3600000)) / 60000;
-
-        console.log("debutAfternoonReference : ", debutAfternoonReference);
-        console.log("dureeAfternoon : ", dureeAfternoon);
-
-
-        console.log("dureeJourneeStd : ", dureeJourneeStd);
-
-        console.log("heureDepartTmp : ", heureDepartTmp);
-
         this.setState({
-                        dureeMatin : dureeMatinHoursTmp + "h " + dureeMatinMinutesTmp + " min",
-                        dureeMidi : dureeMidiHoursTmp + "h " + dureeMidiMinutesTmp + " min",
-                        heureMiniDepart : heureDepartTmp.getHours() + "h " + heureDepartTmp.getMinutes() + " min"
+                        dureeMatin : this.getDisplayTime(dureeMatinTmp),
+                        dureeMidi : this.getDisplayTime(dureePause),
+                        heureMiniDepart : this.getLeaveTime(debutAfternoonReference, (dureeJourneeStd - dureeMatinTmp))
                     });
 
 
