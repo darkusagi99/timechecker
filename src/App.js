@@ -3,15 +3,17 @@ import 'date-fns';
 import DateFnsUtils from '@date-io/date-fns';
 import {
   MuiPickersUtilsProvider,
-  KeyboardTimePicker,
-  KeyboardDatePicker,
+  KeyboardTimePicker
 } from '@material-ui/pickers';
 
-
-import logo from './logo.svg';
 import './App.css';
 
+// Constantes
+const dureeJourneeStd = 28800000; // 8 Heures
+const dureeMidiMini = 1800000; // 30 Minutes
+
 class App extends Component {
+
 
     // Constructeur
     constructor(props) {
@@ -27,12 +29,45 @@ class App extends Component {
             dureeMidi : 0,
             dureeJournee : 0,
             heuresATravailler : 8,
-            heureMiniDepart : new Date()
+            heureMiniDepart : ""
         }
     }
 
     recalculDurees() {
+        var dureeMatinTmp = this.state.morningEnd - this.state.morningStart;
+        var dureePause = this.state.afternoonStart - this.state.morningEnd;
+        var debutAfternoonMini = new Date(this.state.morningEnd.getTime() + dureeMidiMini);
 
+        var debutAfternoonReference;
+
+        if (debutAfternoonMini > this.state.afternoonStart) {
+            debutAfternoonReference = debutAfternoonMini;
+        } else {
+            debutAfternoonReference = this.state.afternoonStart;
+        }
+
+        var dureeAfternoon = dureeJourneeStd - dureeMatinTmp;
+        var heureDepartTmp = new Date(debutAfternoonReference.getTime() + (dureeJourneeStd - dureeMatinTmp));
+
+        var dureeMatinHoursTmp = Math.floor(dureeMatinTmp / 3600000);
+        var dureeMatinMinutesTmp = (dureeMatinTmp - (dureeMatinHoursTmp * 3600000)) / 60000;
+
+        var dureeMidiHoursTmp = Math.floor(dureePause / 3600000);
+        var dureeMidiMinutesTmp = (dureePause - (dureeMidiHoursTmp * 3600000)) / 60000;
+
+        console.log("debutAfternoonReference : ", debutAfternoonReference);
+        console.log("dureeAfternoon : ", dureeAfternoon);
+
+
+        console.log("dureeJourneeStd : ", dureeJourneeStd);
+
+        console.log("heureDepartTmp : ", heureDepartTmp);
+
+        this.setState({
+                        dureeMatin : dureeMatinHoursTmp + "h " + dureeMatinMinutesTmp + " min",
+                        dureeMidi : dureeMidiHoursTmp + "h " + dureeMidiMinutesTmp + " min",
+                        heureMiniDepart : heureDepartTmp.getHours() + "h " + heureDepartTmp.getMinutes() + " min"
+                    });
 
 
     }
@@ -41,24 +76,24 @@ class App extends Component {
             this.setState({
                 morningStart : date
             });
+
+            this.recalculDurees();
     }
 
     handleDateMorningEndChange = date => {
             this.setState({
                 morningEnd : date
             });
+
+            this.recalculDurees();
     }
 
     handleDateAfternoonStartChange = date => {
             this.setState({
                 afternoonStart : date
             });
-    }
 
-    handleDateAfternoonEndChange = date => {
-            this.setState({
-                afternoonEnd : date
-            });
+            this.recalculDurees();
     }
 
   render() {
@@ -112,23 +147,8 @@ class App extends Component {
         </div>
 
         <div>Durée midi : {this.state.dureeMidi}</div>
-        <div className="form-group">
-            <MuiPickersUtilsProvider utils={DateFnsUtils}>
-                <KeyboardTimePicker
-                margin="normal"
-                id="afternoonEnd"
-                label="Depart après-midi"
-                ampm={false}
-                value={this.state.afternoonEnd}
-                onChange={this.handleDateAfternoonEndChange}
-                KeyboardButtonProps={{
-                'aria-label': 'change time',
-                }}
-                />
-            </MuiPickersUtilsProvider>
-        </div>
 
-        <div>Durée journée : {this.state.dureeJournee}</div>
+        <div>Durée journée : {this.state.heureMiniDepart}</div>
     </div>
   );
   }
